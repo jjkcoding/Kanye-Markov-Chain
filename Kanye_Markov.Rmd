@@ -1,0 +1,100 @@
+---
+title: "Kanye Markov Verses"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+text = read.delim("kanye_verses.txt", header = F, quote = "", as.is = T);
+```
+
+
+# Creating Initial Probability Table 
+
+I created a probability table based on the number of times each word was found in the lyrics. This will help us with creating the first script.
+```{r}
+fullText = NULL;
+for(i in 1:nrow(text)){
+  removeCommas = gsub(",", "", text[i,1]);
+  removePunc = gsub('[[:punct:] ]+',' ', removeCommas)
+  removeUnknownChar = gsub("[^[:alnum:]]", " ", removePunc)
+  wordL = strsplit(removeUnknownChar, " ");
+
+  for(x in wordL){
+    fullText = c(fullText, tolower(x));
+  }
+}
+
+pTable = prop.table(table(fullText));
+print(head(pTable, 100))
+```
+
+# 1) Randomly Sampled Kanye Script
+
+In this script, we will randomly select 500 words from the probability table created above. Will this script sound similar to Kanye's original lyrics?
+
+Answer: No, because the words are randomly generated. The words are not pieced together in a specific order, so it is just a bunch of random words scrambled together.
+```{r}
+reps = 500;
+textL1 = NULL;
+textL1 = sample(sort(unique(fullText)), 500, prob = pTable);
+text1 = paste(textL1, collapse = " ");
+text1
+```
+
+# 2) 1st Order Kanye Markov Script
+
+In this script, I will create a new script based on a first order Markov Chain. First, I grab the first word of the last script, because it was already randomly generated. Then, I would find all of the next words after currently selected word inside Kanye's lyrics and create a probability table. For example, let us say the lyrics said "I threw suicides on the private jet" and the current word is "I". Then, I would grab the word "threw" and add it to my newly created probability table. Based on the newly created probability table, I would select a new word and continue this cycle.
+
+Does this create a script similar to Kanye's original lyrics?
+Answer: No, but better than the previous attempt. In this attempt, the words are much more connected but only with previous word. This makes it sound like one large run-on sentence.
+
+```{r}
+reps = 500;
+textL2 = textL1[1]
+
+for(i in 1:reps){
+  after = fullText[which(fullText == textL2[i]) + 1]
+  tempTable = prop.table(table(after));
+  textL2 = c(textL2, sample(sort(unique(after)), 1, prob = tempTable));
+}
+
+text2 = paste(textL2, collapse = " ");
+text2
+```
+
+
+# 3) 2nd Order Kanye Markov Script
+
+In this script, I will create a Kanye script using a second order Markov Chain. First, I would grab the first two words from the previous script. This is because the first word is randomly generated and the second word is connected to the first word. Then, I would find the two words inside of Kanye's original lyrics and create a probability table of the next word like the method used in the previous script. After that, I would randomly select words based on this newly created probability table and generate a Kanye script. 
+
+Does this create a script similar to Kanye's script?
+Answer: No, the lyrics are still a mess. Because I left out the punctuation from the original Kanye script, it is hard to find where each verse ends and begins. However, there are some areas where you can tell the verse ends and begins a new verse and the words are much more connected than the previous attempt.
+
+```{r}
+textL3 = textL2[1:2]
+
+reps = 500;
+for(i in 1:reps){
+  after1 = fullText[which(fullText == textL3[i]) + 1];
+  after2 = fullText[which(fullText == textL3[i]) + 2];
+  
+  words = NULL;
+  for(x in 1:length(after1)){
+    if(!is.na(after1[x])){
+      if(after1[x] == textL3[i + 1]){
+        words = c(words, after2[x]);
+      }
+    }
+  }
+  
+  propT = prop.table(table(words));
+  samp = sample(sort(unique(words)), 1, prob = propT);
+  textL3 = c(textL3, samp);
+  
+}
+text3 = paste(textL3, collapse = " ");
+text3
+```
+
+# Conclusion
+Overall, this was a fun experiment that helped me learn how to code Markov Chains and deeply understand the uses of Markov Chains. Although the newly created scripts cannot compare to Kanye's original script, a second order Markov Chain is still able to replicate a random and new script similar to Kanye's original script. I could see how this could be used in other real word activities such as decoding a new language or identifying phrases from hieroglyphics. 
