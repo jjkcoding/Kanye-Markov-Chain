@@ -1,5 +1,10 @@
-# Kanye-Markov-Chain
+# Kanye Markov Chain: Project Overview
+* Transform and prepare Kanye lyrics for markov chains
+* Randomly sample from original Kanye lyrics for reference
+* Form first and second order Markov Chain Kanye Scripts
+* Analyze differences between random sampled and markov chain scripts
 
+## Purpose:
 One of my statistics professors mentioned that Markov Chains could be used to identify key phrases and help translate an unknown language. To further help us understand this concept of first and second order Markov Chains and n-grams, I created three different models of randomly generated scripts based on Kanye's song lyrics. 
 
 ## Models: 
